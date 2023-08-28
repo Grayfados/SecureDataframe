@@ -1,0 +1,24 @@
+{
+  "allowed_dfs": ["df_name"],
+  "groups": {
+    "grps-streamlit-smb-regra-002": {
+      "df_name_2": {
+        "column_rules": {
+          "and": {"a": "> 2"},
+          "or": {}
+        }
+      },
+      "df_name_3": {
+        "column_rules": {
+          "and": {"b": "> 2"},
+          "or": {}
+        }
+      }
+    },
+    "grps-streamlit-smb-regra-003": {
+      "df_name_3": {
+        "enable_all": true
+      }
+    }
+  }
+}
