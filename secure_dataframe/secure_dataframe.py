@@ -1,7 +1,18 @@
+import pandas as pd
+
+from sys import stdout
+import operator
+import logging
 import json
 
-import pandas as pd
-import operator
+logger_name = 'secure_dataframe'
+logger = logging.getLogger(logger_name)
+logger.handlers.clear()
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler(stdout)
+formatter = logging.Formatter('%(name)s-> %(message)s [%(levelname)s]')
+sh.setFormatter(formatter)
+logger.addHandler(sh)
 
 
 class SecureDataFrame:
@@ -13,7 +24,7 @@ class SecureDataFrame:
         self.security_column = 'security_group'
 
     def create_security_column(self):
-        self.df[self.security_column] = ''
+        self.df[self.security_column] = [[] for _ in range(len(self.df))]
 
         allowed_dfs = self.data_rules.get("allowed_dfs", [])
         groups = self.data_rules.get("groups", {})
@@ -32,7 +43,7 @@ class SecureDataFrame:
         enable_all = df_rules.get("enable_all", False)
 
         if enable_all:
-            self.df.loc[:, self.security_column] = self.df.loc[:, self.security_column].apply(lambda x: x + f';{group}')
+            self.df.loc[:, self.security_column] = self.df.loc[:, self.security_column].apply(lambda x: x + [group])
         else:
             if filter_rules:
                 self._apply_filter_rules(filter_rules, group)
@@ -45,7 +56,7 @@ class SecureDataFrame:
 
     def _apply_filter_rules(self, filter_rules, group):
         indexes = self.df.query(filter_rules).index
-        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + f';{group}')
+        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + [group])
 
     def _apply_and_column_rules(self, rules, group):
         result = pd.Series(True, index=self.df.index)
@@ -53,7 +64,7 @@ class SecureDataFrame:
             operation_func = self._parse_operation(operation_text)
             result &= operation_func(self.df[col])
         indexes = result[result].index
-        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + f';{group}')
+        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + [group])
 
     def _apply_or_column_rules(self, rules, group):
         result = pd.Series(False, index=self.df.index)
@@ -61,7 +72,7 @@ class SecureDataFrame:
             operation_func = self._parse_operation(operation_text)
             result |= operation_func(self.df[col])
         indexes = result[result].index
-        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + f';{group}')
+        self.df.loc[indexes, self.security_column] = self.df.loc[indexes, self.security_column].apply(lambda x: x + [group])
 
     def _parse_operation(self, operation_text):
         operators = {
@@ -96,10 +107,10 @@ def read_validate_data_rules(filename):
     first_keys = {"allowed_dfs", "groups"}
     filter_keys = {"filter_rules", "column_rules", "enable_all"}
 
-    if set(data_rules.keys()) == first_keys:
+    if first_keys.issubset(set(data_rules.keys())):
         for group, dfs in data_rules["groups"].items():
             for df_name, filters in dfs.items():
-                if set(filters).issubset(filter_keys):
+                if filter_keys.issubset(set(filters)):
                     continue
                 else:
                     logger.warning("Found filter that are not part of default filter groups")
