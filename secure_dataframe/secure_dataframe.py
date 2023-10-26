@@ -32,7 +32,7 @@ class SecureDataFrame:
         enable_all = df_rules.get("enable_all", False)
 
         if enable_all:
-            self.df.loc[self.security_column] = self.df.loc[self.security_column].apply(lambda x: x + f';{group}')
+            self.df.loc[:, self.security_column] = self.df.loc[:, self.security_column].apply(lambda x: x + f';{group}')
         else:
             if filter_rules:
                 self._apply_filter_rules(filter_rules, group)
