@@ -110,7 +110,7 @@ def read_validate_data_rules(filename):
     if first_keys.issubset(set(data_rules.keys())):
         for group, dfs in data_rules["groups"].items():
             for df_name, filters in dfs.items():
-                if filter_keys.issubset(set(filters)):
+                if set(filters).issubset(filter_keys):
                     continue
                 else:
                     logger.warning("Found filter that are not part of default filter groups")
