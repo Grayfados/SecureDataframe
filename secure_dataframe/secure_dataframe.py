@@ -84,9 +84,9 @@ class SecureDataFrame:
     def _contains(col, value):
         return col.str.contains(value)
 
-    @staticmethod
-    def filter_by_groups(df, groups):
-        return df[df['security_group'].apply(lambda x: 'all' in x or any(group in x for group in groups))]
+
+def filter_by_groups(df, groups):
+    return df[df['security_group'].apply(lambda x: 'all' in x or any(group in x for group in groups))]
 
 
 def read_validate_data_rules(filename):

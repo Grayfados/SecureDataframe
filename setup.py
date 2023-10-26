@@ -8,7 +8,7 @@ REQUIRED_PACKAGES = [
 setup(
     name='secure_dataframe',  # How you named your package folder (MyLib)
     packages=['secure_dataframe'],  # Chose the same as "name"
-    version='0.0.3',  # Start with a small number and increase it with every change you make
+    version='0.0.4',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='A way to secure and filter dataframe on pandas',  # Give a short description about your library
     author='Pedro Pinho',  # Type in your name
