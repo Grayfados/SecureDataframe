@@ -1,7 +1,7 @@
 {
   "allowed_dfs": ["df_name"],
   "groups": {
-    "grps-streamlit-smb-regra-002": {
+    "grps-streamlit-regra-002": {
       "df_name_2": {
         "column_rules": {
           "and": {"a": "> 2"},
@@ -15,7 +15,7 @@
         }
       }
     },
-    "grps-streamlit-smb-regra-003": {
+    "grps-streamlit-regra-003": {
       "df_name_3": {
         "enable_all": true
       }

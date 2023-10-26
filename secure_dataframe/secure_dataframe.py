@@ -84,16 +84,29 @@ class SecureDataFrame:
     def _contains(col, value):
         return col.str.contains(value)
 
+    @staticmethod
+    def filter_by_groups(df, groups):
+        return df[df['security_group'].apply(lambda x: 'all' in x or any(group in x for group in groups))]
 
 
-
-def read_data_rules(filename):
+def read_validate_data_rules(filename):
     with open(f'{filename}') as f:
-        return json.loads(f.read())
+        data_rules = json.loads(f.read())
 
-if __name__ == "__main__":
-    df = pd.DataFrame.from_records([{"a": 1}, {"a": 3}, {"a": 5}, {"a": 7}])
-    df_name = SecureDataFrame(df, "df_name", read_data_rules("rls_rules.json"))
-    df = pd.DataFrame.from_records([{"a": 8}, {"a": 93}, {"a": 45}, {"a": 75}])
-    df_name_2 = SecureDataFrame("df_name_2", read_data_rules("rls_rules.json"))
-    # df_name_3 = pd.DataFrame("df_name_3", read_data_rules("rls_rules.json"), data=[{"a": 1}, {"a": 3}, {"a": 5}, {"a": 7}])
+    first_keys = {"allowed_dfs", "groups"}
+    filter_keys = {"filter_rules", "column_rules", "enable_all"}
+
+    if set(data_rules.keys()) == first_keys:
+        for group, dfs in data_rules["groups"].items():
+            for df_name, filters in dfs.items():
+                if set(filters).issubset(filter_keys):
+                    continue
+                else:
+                    logger.warning("Found filter that are not part of default filter groups")
+                    logger.warning(f"Default: {filter_keys} - passed {set(filters)}")
+    else:
+        logger.error("Non-expected structure! Check documentation!")
+        logger.error(f"Default: {first_keys} - passed {set(data_rules.keys())}")
+        raise Exception("Non-expected structure! Check documentation!")
+
+    return data_rules
